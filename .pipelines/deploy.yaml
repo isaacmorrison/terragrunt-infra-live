@@ -12,7 +12,7 @@ jobs:
             inputs:
               knownHostsEntry: '$(ssh_known_hosts)'
               sshPublicKey: '$(myPubKey)'
-              sshKeySecureFile: 'id_rsa'
+              sshKeySecureFile: 'id_rsa' 
 
           - task: AzureCLI@2
             displayName: Apply Terraform

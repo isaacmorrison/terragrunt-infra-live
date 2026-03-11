@@ -1,0 +1,39 @@
+
+pool: mycustomagent
+trigger: none
+pr: none
+
+parameters:
+  - name: directorypath
+    type: string
+    default: infrastructure/microserviceapp/common
+  - name: environments
+    type: object
+    default:
+      - sand
+      - dev
+      - prod
+
+variables:
+- name: isMain
+  value: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
+- group: azdevopsterraform
+- name:  directorypath
+  value: ${{parameters.directorypath}}
+
+
+stages:
+- ${{ each env in parameters.environments }}:
+  - stage: Build${{ env }}
+    jobs:
+    - template: ./.pipelines/infrastructure/build/build2.yaml   
+      parameters:
+        env: ${{ env }}
+
+  - stage: Deploy${{ env }}
+    dependsOn: Build${{ env }}
+    condition: and(succeeded(), or(eq(variables['Build.Reason'], 'Manual'), eq(variables['Build.Reason'], 'Schedule')))
+    jobs:
+    - template: ./.pipelines/infrastructure/deploy/deploy2.yaml
+      parameters:
+        env: ${{ env }}

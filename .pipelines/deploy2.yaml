@@ -1,0 +1,27 @@
+parameters:
+  - name: env
+
+jobs:
+  - deployment: DeployAndApplyTerraform
+    environment: ${{parameters.env}}
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: InstallSSHKey@0
+            inputs:
+              knownHostsEntry: '$(ssh_known_hosts)'
+              sshPublicKey: '$(myPubKey)'
+              sshKeySecureFile: 'id_rsa'
+
+          - task: AzureCLI@2
+            displayName: Apply Terraform
+            inputs:
+              azureSubscription: '<your-azure-service-connection>' # replace with your service connection name
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                echo Running Terrafrom Apply 
+                export TF_VAR_environment=${{parameters.env}}
+                terragrunt run-all apply --terragrunt-non-interactive -auto-approve
+              workingDirectory: '$(System.DefaultWorkingDirectory)/$(directorypath)/default'

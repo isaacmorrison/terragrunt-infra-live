@@ -1,0 +1,36 @@
+parameters:
+  - name: env
+
+jobs:
+  - job: 'Build${{parameters.env}}AndPublish'
+    continueOnError: false
+    steps:
+    - task: InstallSSHKey@0
+      inputs:
+        knownHostsEntry: '$(ssh_known_hosts)'
+        sshPublicKey: '$(myPubKey)'        # This should be the public key content, not a reference to a file
+        sshKeySecureFile: 'id_rsa'
+
+    - task: AzureCLI@2
+      displayName: Terragrunt init and plan
+      inputs:
+        azureSubscription: '<your-azure-service-connection>' # replace with your service connection name
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          echo Running Terragrunt Init and Plan 
+          export TF_VAR_environment=${{parameters.env}}     # Set the environment variable for Terragrunt
+          terragrunt run-all init && terragrunt run-all plan -out out.plan
+        workingDirectory: '$(System.DefaultWorkingDirectory)/$(directorypath)/default'
+
+    - task: CopyFiles@2
+      inputs:
+        Contents: |
+          $(directorypath)/default/*
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'defaultplan'
+        publishLocation: 'Container'

@@ -27,7 +27,7 @@ stages:
 - ${{ each env in parameters.environments }}:
   - stage: Build${{ env }}
     jobs:
-    - template: ./.pipelines/infrastructure/build/build2.yaml   
+    - template: ./.pipelines/infrastructure/build/build.yaml   
       parameters:
         env: ${{ env }}
 
@@ -35,6 +35,6 @@ stages:
     dependsOn: Build${{ env }}
     condition: and(succeeded(), or(eq(variables['Build.Reason'], 'Manual'), eq(variables['Build.Reason'], 'Schedule')))
     jobs:
-    - template: ./.pipelines/infrastructure/deploy/deploy2.yaml
+    - template: ./.pipelines/infrastructure/deploy/deploy.yaml
       parameters:
         env: ${{ env }}

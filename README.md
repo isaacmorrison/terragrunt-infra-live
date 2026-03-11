@@ -73,8 +73,8 @@ This approach allows developers to test configurations locally by switching the 
 .
 ├── common.hcl
 ├── .pipelines/
-│   ├── build2.yaml
-│   └── deploy2.yaml
+│   ├── build.yaml
+│   └── deploy.yaml
 ├── terraformmodules/
 │   ├── network/
 │   └── vm/
